@@ -1,0 +1,67 @@
+pragma solidity ^0.6.6;
+
+contract ResidencePermit {
+    struct User {
+        uint256 UserID;
+        string Priority;
+        string Data;
+    }
+    
+    struct Prio {
+        string PriorityType;
+    }
+    
+    mapping (address => User) public Users;
+    
+    mapping (uint => Prio) private Prios;
+    
+    function generatePrio() private{
+     
+        Prios[1].PriorityType = "HIGH";
+        Prios[2].PriorityType = "MEDIUM";
+        Prios[3].PriorityType = "LOW";
+    }
+    
+    function setRequestPriority(bool  _hasKids, uint _familyMembersCount, uint _WorkersInFamily, uint _currentEndingDateRent) private returns(string memory) {
+        
+        if(5 >= _currentEndingDateRent) {
+            return "HIGH";
+        }
+        if(_hasKids) {
+            if(_familyMembersCount >= 3 && _WorkersInFamily <= 1 && 305 >= _currentEndingDateRent ) {
+                return "HIGH";
+            } else if (_familyMembersCount > 3 && _WorkersInFamily < 2 && 305 <= _currentEndingDateRent) {
+                return "MEDIUM";
+            } else {
+                return "LOW";
+            }
+        }
+        if(_familyMembersCount > 3) {
+            if(_WorkersInFamily < 1) {
+                return "HIGH";
+            } else if(_WorkersInFamily <= 2 && 305 >= _currentEndingDateRent ) {
+                return "MEDIUM";
+            } else {
+                return "LOW";
+            }
+        } 
+    }
+    
+    function addUserData(uint256 _UserID, string memory _Data, bool  _hasKids, uint _familyMembersCount, uint _WorkersInFamily, uint _currentEndingDateRent) public {
+        generatePrio();
+      
+        Users[msg.sender].UserID = _UserID;
+        Users[msg.sender].Priority = setRequestPriority(_hasKids,_familyMembersCount,_WorkersInFamily,_currentEndingDateRent);
+        Users[msg.sender].Data = _Data;
+    }
+    
+    function getUserInfo(address _address) view public returns (uint256, string memory, string memory) {
+        return (Users[_address].UserID, Users[_address].Priority, Users[_address].Data);
+    }
+    
+    function getUserAdress() view public returns (address) {
+        return msg.sender;
+    }
+    
+    
+}
